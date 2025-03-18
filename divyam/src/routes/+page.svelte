@@ -73,13 +73,22 @@
             </div>
         </div>
 
-        <!-- Project Credit and Demo Video -->
-        <div class="relative z-10 mt-[4vw] mb-8">
-            <p class="text-white/40 text-sm mb-3 text-center">Project by Divyam</p>
-            <div class="w-full max-w-xl mx-auto aspect-video bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl flex items-center justify-center">
-                <p class="text-white/30 text-sm">Demo Video Coming Soon</p>
-            </div>
-        </div>
+ <div class="relative z-10 container mx-auto px-4 mt-16 md:mt-24">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-8 text-white">Demo Video</h2>
+      <div class="relative w-full max-w-3xl mx-auto aspect-video rounded-lg overflow-hidden shadow-2xl">
+        <iframe
+          src="https://streamable.com/e/kfq0nd"
+          class="absolute inset-0 w-full h-full"
+          frameborder="0"
+          allowfullscreen
+          allow="autoplay; fullscreen"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+
+      
     </div>
 </div>
 
