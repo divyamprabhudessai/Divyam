@@ -1,64 +1,88 @@
 <script>
     import { goto } from '$app/navigation';
     import { authStore } from '$lib/stores/authStore.js';
-    import Logo from '../../../assets/Logo.svg'
 
     export let data;
 
-    let otpCode = ['', '', '', ''];
+    let otpDigits = ['', '', '', ''];
+    let isLoading = false;
+    let errorMessage = '';
 
-    function handleInput(event, index) {
+    function handleOTPInput(event, index) {
         const value = event.target.value;
-        if (/\d/.test(value)) {
-            otpCode[index] = value;
+        if (validateOTPInput(value)) {
+            otpDigits[index] = value;
             if (index < 3) {
                 document.getElementById(`otp-input-${index + 1}`).focus();
             }
         } else {
-            otpCode[index] = '';
+            otpDigits[index] = '';
         }
+        otpDigits = [...otpDigits]; // Trigger reactivity
+    }
+
+    function validateOTPInput(value) {
+        return /^\d$/.test(value);
     }
 
     async function validateOTP() {
-        const enteredOTP = otpCode.join('');
+        const enteredOTP = otpDigits.join('');
 
         if (!data?.countryCode || !data?.phoneNumber) {
-            alert('Phone number data is missing. Please try requesting OTP again.');
+            errorMessage = 'Phone number data is missing. Please try requesting OTP again.';
             goto('/auth/request-otp');
             return;
         }
 
-        const requestBody = {
-            phone: {
-                countryCode: data.countryCode,
-                number: data.phoneNumber
-            },
-            otp: {
-                code: enteredOTP
+        isLoading = true;
+        errorMessage = '';
+
+        try {
+            const response = await fetch('/api/v2/collaborators?action=validate-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    phone: {
+                        countryCode: data.countryCode,
+                        number: data.phoneNumber
+                    },
+                    otp: {
+                        code: enteredOTP
+                    }
+                })
+            });
+
+            if (response.status === 204) {
+                const params = new URLSearchParams({
+                    countryCode: data.countryCode,
+                    phoneNumber: data.phoneNumber
+                });
+                goto(`/auth/sign-in?${params.toString()}`);
+            } else {
+                const responseClone = response.clone();
+                try {
+                    const errorData = await responseClone.json();
+                    errorMessage = errorData.message || 'Unknown error';
+                } catch (parseError) {
+                    const errorText = await response.text();
+                    errorMessage = errorText || 'Unknown error';
+                }
             }
-        };
-
-        const validateRes = await fetch('/api/v2/collaborators?action=validate-otp', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(requestBody)
-        });
-
-        if (validateRes.status === 204) {
-            goto(`/auth/sign-in?countryCode=${encodeURIComponent(data.countryCode)}&phoneNumber=${encodeURIComponent(data.phoneNumber)}`);
-        } else {
-            alert('Failed to validate OTP. Please try again.');
+        } catch (error) {
+            console.error('OTP Validation Error:', error);
+            errorMessage = 'Network error. Please try again.';
+        } finally {
+            isLoading = false;
         }
     }
 </script>
 
-<!-- Logo header -->
-<div class="fixed top-0 w-full flex gap-x-2 p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10">
-    <img src={Logo} alt="Logo" class="h-8 sm:h-auto filter invert"> 
-    <h1 class="text-[1.1rem] sm:text-[1.3rem] font-bold text-white">DIVYAM</h1>
+<!-- Logo -->
+<div class="flex justify-center mb-8">
+    <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert">
 </div>
 
 <div class="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 relative">
@@ -73,26 +97,44 @@
             </h1>
 
             <div class="flex justify-center gap-4 mb-10">
-                {#each otpCode as _, index}
+                {#each otpDigits as _, index}
                     <div class="relative">
                         <input
                             id={`otp-input-${index}`}
                             type="text"
                             maxlength="1"
                             class="w-12 h-14 text-center text-xl bg-white/5 border-b-2 border-white/20 focus:border-white/50 text-white placeholder-gray-400 focus:outline-none transition-all rounded-lg"
-                            bind:value={otpCode[index]}
-                            on:input={(event) => handleInput(event, index)}
+                            bind:value={otpDigits[index]}
+                            on:input={(event) => handleOTPInput(event, index)}
+                            inputmode="numeric"
                         />
                     </div>
                 {/each}
             </div>
 
+            {#if errorMessage}
+                <p class="text-red-400 text-sm mb-4">{errorMessage}</p>
+            {/if}
+
             <button 
-                on:click={validateOTP} 
-                class="w-full bg-gradient-to-r from-white via-gray-200 to-white text-black rounded-2xl px-8 py-3 font-medium transition-all duration-300 hover:opacity-90 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
+                on:click={validateOTP}
+                disabled={isLoading || otpDigits.join('').length !== 4}
+                class="w-full bg-gradient-to-r from-white via-gray-200 to-white text-black rounded-2xl px-8 py-3 font-medium transition-all duration-300 hover:opacity-90 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                Verify OTP
+                {isLoading ? 'Validating...' : 'Verify OTP'}
             </button>
         </div>
     </div>
 </div>
+
+<style>
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 30px white inset !important;
+    }
+</style>

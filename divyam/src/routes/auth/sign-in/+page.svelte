@@ -1,11 +1,12 @@
 <script>
     import { goto } from '$app/navigation';
     import { authStore } from '$lib/stores/authStore.js';
-    import Logo from '../../../assets/Logo.svg';
 
     export let data;
 
-    // State variables with more descriptive names
+    // State variables
+    let countryCode = data?.countryCode || '';
+    let phoneNumber = data?.phoneNumber || '';
     let otpDigits = ['', '', '', ''];
     let otpInputRefs = [];
     let isLoading = false;
@@ -69,7 +70,7 @@
 
     // Main sign-in function
     async function handleSignIn() {
-        if (!data?.countryCode || !data?.phoneNumber) {
+        if (!countryCode || !phoneNumber) {
             errorMessage = 'Phone number data is missing. Please try requesting OTP again.';
             goto('/auth/request-otp');
             return;
@@ -84,8 +85,8 @@
                 headers: API_HEADERS,
                 body: JSON.stringify({
                     phone: {
-                        countryCode: data.countryCode,
-                        number: data.phoneNumber
+                        countryCode: countryCode,
+                        number: phoneNumber
                     },
                     otp: {
                         code: otpDigits.join('')
@@ -114,32 +115,56 @@
     }
 </script>
 
-<div class="min-h-screen bg-gray-100 flex flex-col">
-    <!-- Logo header -->
-    <div class="flex gap-x-2 p-5">
-        <img src={Logo} alt="Logo"> 
-        <h1 class="text-[1.3rem] font-bold">MIGHTY X ABRA</h1>
-    </div>
+<!-- Logo -->
+<div class="flex justify-center mb-8">
+    <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert">
+</div>
 
-    <!-- Main content -->
-    <div class="flex-1 flex flex-col items-center justify-center px-6 pb-6">
-        <div class="bg-white rounded-lg shadow-md w-full max-w-md p-8">
-            <h1 class="text-2xl font-bold text-center text-gray-900 mb-8">
-                Enter the OTP to<br>sign in to your account
+<div class="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 relative">
+    <!-- Gradient overlay -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/50 pointer-events-none"></div>
+    
+    <!-- Content -->
+    <div class="relative z-10 max-w-md w-full">
+        <div class="bg-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl">
+            <h1 class="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent mb-8">
+                Sign In
             </h1>
+
+            <div class="relative flex gap-4 mb-6">
+                <div class="w-1/4 relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 rounded-xl"></div>
+                    <input 
+                        type="text" 
+                        bind:value={countryCode}
+                        placeholder="Code"
+                        class="relative w-full h-14 text-center text-xl bg-transparent border border-white/20 focus:border-white/40 text-white placeholder-gray-400 focus:outline-none transition-all rounded-xl backdrop-blur-sm"
+                    />
+                </div>
+                <div class="w-3/4 relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 rounded-xl"></div>
+                    <input 
+                        type="text" 
+                        bind:value={phoneNumber}
+                        placeholder="Phone Number"
+                        class="relative w-full h-14 text-xl px-4 bg-transparent border border-white/20 focus:border-white/40 text-white placeholder-gray-400 focus:outline-none transition-all rounded-xl backdrop-blur-sm"
+                    />
+                </div>
+            </div>
 
             <div class="flex justify-center gap-4 mb-10">
                 {#each otpDigits as _, index}
                     <div class="relative">
+                        <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 rounded-xl"></div>
                         <input
                             id={`otp-input-${index}`}
                             type="text"
                             maxlength="1"
-                            class="w-12 h-14 text-center text-xl border-b-2 border-black focus:outline-none focus:border-blue-500"
+                            class="relative w-12 h-14 text-center text-xl bg-transparent border border-white/20 focus:border-white/40 text-white placeholder-gray-400 focus:outline-none transition-all rounded-xl backdrop-blur-sm"
                             bind:value={otpDigits[index]}
                             bind:this={otpInputRefs[index]}
-                            on:input={(e) => handleOTPInput(index, e)}
-                            on:keydown={(e) => handleOTPKeydown(index, e)}
+                            on:input={(event) => handleOTPInput(index, event)}
+                            on:keydown={(event) => handleOTPKeydown(index, event)}
                             on:paste={handleOTPPaste}
                             inputmode="numeric"
                         />
@@ -148,15 +173,41 @@
             </div>
 
             {#if errorMessage}
-                <p class="text-red-500 text-center mb-4">{errorMessage}</p>
+                <p class="text-red-400 text-sm mb-4">{errorMessage}</p>
             {/if}
 
             <button 
                 on:click={handleSignIn}
                 disabled={isLoading || otpDigits.join('').length !== 4}
-                class="w-full border-2 p-3 rounded-2xl bg-white text-black hover:text-white hover:bg-black transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="group relative w-full overflow-hidden rounded-2xl px-8 py-3 mt-8 font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                <!-- Gradient background -->
+                <div class="absolute inset-0 bg-gradient-to-r from-white via-gray-200 to-white opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+                
+                <!-- Animated border -->
+                <div class="absolute inset-0 rounded-2xl border border-white/20 group-hover:border-white/40 transition-colors duration-300"></div>
+                
+                <!-- Content -->
+                <div class="relative flex items-center justify-center gap-2">
+                    <span class="text-black font-semibold">
+                        {isLoading ? 'Signing in...' : 'Sign In'}
+                    </span>
+                    {#if !isLoading}
+                        <svg 
+                            class="w-5 h-5 text-black transform group-hover:translate-x-1 transition-transform duration-300" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path 
+                                stroke-linecap="round" 
+                                stroke-linejoin="round" 
+                                stroke-width="2" 
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"
+                            />
+                        </svg>
+                    {/if}
+                </div>
             </button>
         </div>
     </div>
@@ -170,9 +221,14 @@
         margin: 0;
     }
 
-
     /* Remove background color when autofilled */
     input:-webkit-autofill {
-        -webkit-box-shadow: 0 0 0 30px white inset !important;
+        -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+        -webkit-text-fill-color: white !important;
+    }
+
+    /* Add subtle glow effect on focus */
+    input:focus {
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
     }
 </style> 

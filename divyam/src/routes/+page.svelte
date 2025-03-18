@@ -1,6 +1,12 @@
 <script>
     import { goto } from '$app/navigation';
-    import Logo from '../assets/Logo.svg';
+    import { onMount } from 'svelte';
+
+    let isVisible = false;
+
+    onMount(() => {
+        isVisible = true;
+    });
 
     function handleGetStarted() {
         goto('/auth/request-otp');
@@ -9,8 +15,7 @@
 
 <!-- Logo header -->
 <div class="fixed top-0 w-full flex gap-x-2 p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10">
-    <img src={Logo} alt="Logo" class="h-8 sm:h-auto filter invert"> 
-    <h1 class="text-[1.1rem] sm:text-[1.3rem] font-bold text-white">DIVYAM</h1>
+    <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-6 w-auto filter invert"> 
 </div>
 
 <div class="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 relative">
@@ -18,23 +23,67 @@
     <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/50 pointer-events-none"></div>
     
     <!-- Content -->
-    <div class="relative z-10 max-w-2xl w-full">
-        <div class="bg-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl">
-            <h1 class="text-3xl sm:text-4xl font-bold text-center bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
-                Welcome to DIVYAM
+    <div class="relative z-10 max-w-4xl w-full text-center">
+        <div class="space-y-6">
+            <!-- Main heading with animation -->
+            <h1 
+                class="text-4xl sm:text-6xl font-bold bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent opacity-0 transition-all duration-1000"
+                class:opacity-100={isVisible}
+                class:translate-y-0={isVisible}
+                style="transform: translateY(20px);"
+            >
+                Effortless Order Management
             </h1>
-            <p class="text-gray-300 mt-4 text-center max-w-md text-sm sm:text-base mx-auto">
-                Experience seamless order management with our intuitive dashboard. Sign in with your phone number to get started.
-            </p>
-            <p class="text-gray-400 mt-2 text-center text-xs sm:text-sm">
-                Your one-stop solution for efficient order tracking and management.
+
+            <!-- Subheading with animation -->
+            <p 
+                class="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto opacity-0 transition-all duration-1000 delay-300"
+                class:opacity-100={isVisible}
+                class:translate-y-0={isVisible}
+                style="transform: translateY(20px);"
+            >
+                Streamline your orders with our intuitive dashboard. Track, manage, and stay in control—all in one place.
             </p>
 
-            <button 
-                on:click={handleGetStarted}
-                class="w-full sm:w-auto bg-gradient-to-r from-white via-gray-200 to-white text-black rounded-2xl px-8 py-3 mt-8 font-medium transition-all duration-300 hover:opacity-90 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black mx-auto block">
-                Get Started
-            </button>
+            <!-- Animated arrow button -->
+            <div 
+                class="mt-12 opacity-0 transition-all duration-1000 delay-500"
+                class:opacity-100={isVisible}
+                class:translate-y-0={isVisible}
+                style="transform: translateY(20px);"
+            >
+                <button 
+                    on:click={handleGetStarted}
+                    class="group relative inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 backdrop-blur-lg border border-white/10 hover:bg-white/10 transition-all duration-300"
+                >
+                    <svg 
+                        class="w-6 h-6 text-white transform group-hover:translate-x-1 transition-transform duration-300" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                    >
+                        <path 
+                            stroke-linecap="round" 
+                            stroke-linejoin="round" 
+                            stroke-width="2" 
+                            d="M17 8l4 4m0 0l-4 4m4-4H3"
+                        />
+                    </svg>
+                </button>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Add a subtle pulse animation to the button */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    button {
+        animation: pulse 2s infinite;
+    }
+</style>

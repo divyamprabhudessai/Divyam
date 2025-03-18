@@ -1,37 +1,13 @@
 <script>
     import { goto } from '$app/navigation';
-    import Logo from '../../../assets/Logo.svg';
 
-    // State variables with more descriptive names
-    let selectedCountryCode = '91';
-    let userPhoneNumber = '';
+    let countryCode = '91';
+    let phoneNumber = '';
     let isLoading = false;
     let errorMessage = '';
 
-    // API endpoint configuration
-    const API_ENDPOINT = '/api/v2/collaborators';
-    const API_HEADERS = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    };
-
-    // Validation function
-    function validatePhoneNumber(phoneNumber) {
-        return phoneNumber && phoneNumber.length >= 10;
-    }
-
-    // Error handling function
-    function handleApiError(response) {
-        return response.clone().json()
-            .catch(() => response.text())
-            .then(errorData => {
-                throw new Error(errorData.message || 'Unknown error occurred');
-            });
-    }
-
-    // Main OTP request function
-    async function handleOTPRequest() {
-        if (!validatePhoneNumber(userPhoneNumber)) {
+    async function requestOTP() {
+        if (!phoneNumber || phoneNumber.length < 10) {
             errorMessage = 'Please enter a valid phone number.';
             return;
         }
@@ -40,44 +16,68 @@
         errorMessage = '';
 
         try {
-            const response = await fetch(`${API_ENDPOINT}?action=request-otp`, {
+            const res = await fetch('/api/v2/collaborators?action=request-otp', {
                 method: 'POST',
-                headers: API_HEADERS,
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({
                     phone: {
-                        countryCode: selectedCountryCode,
-                        number: userPhoneNumber
+                        countryCode: countryCode,
+                        number: phoneNumber
                     }
                 })
             });
 
-            if (response.status === 204) {
-                const params = new URLSearchParams({
-                    countryCode: selectedCountryCode,
-                    phoneNumber: userPhoneNumber
-                });
-                goto(`/auth/validate-otp?${params.toString()}`);
+            if (res.status === 204) {
+                goto(`/auth/validate-otp?countryCode=${encodeURIComponent(countryCode)}&phoneNumber=${encodeURIComponent(phoneNumber)}`);
             } else {
-                await handleApiError(response);
+                const responseClone = res.clone();
+                try {
+                    const errorData = await responseClone.json();
+                    errorMessage = errorData.message || 'Unknown error';
+                } catch (parseError) {
+                    const errorText = await res.text();
+                    errorMessage = errorText || 'Unknown error';
+                }
             }
         } catch (error) {
-            errorMessage = error.message || 'Network error. Please try again.';
-            console.error('OTP Request Error:', error);
+            console.error('Error requesting OTP:', error);
+            errorMessage = 'Network error. Please try again.';
         } finally {
             isLoading = false;
         }
     }
 </script>
 
-<!-- Logo header -->
-<div class="fixed top-0 w-full flex gap-x-2 p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10">
-    <img src={Logo} alt="Logo" class="h-8 sm:h-auto filter invert"> 
-    <h1 class="text-[1.1rem] sm:text-[1.3rem] font-bold text-white">DIVYAM</h1>
-</div>
-
 <div class="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 relative">
     <!-- Gradient overlay -->
     <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/50 pointer-events-none"></div>
+    
+    <!-- Logo header -->
+    <div class="fixed top-0 w-full flex items-center justify-between p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10">
+        <div class="flex items-center gap-4">
+            <div class="flex justify-center mb-8">
+                <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert">
+            </div>
+        </div>
+        <a href="/" class="p-2 rounded-full hover:bg-white/10 transition-colors duration-200">
+            <svg 
+                class="w-6 h-6 text-white" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+            >
+                <path 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round" 
+                    stroke-width="2" 
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+            </svg>
+        </a>
+    </div>
     
     <!-- Content -->
     <div class="relative z-10 max-w-md w-full">
@@ -86,21 +86,23 @@
                 Enter your phone number
             </h1>
 
-            <div class="flex gap-4 mb-6">
-                <div class="w-1/4">
+            <div class="relative flex gap-4 mb-6">
+                <div class="w-1/4 relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 rounded-xl"></div>
                     <input 
                         type="text" 
-                        bind:value={selectedCountryCode}
+                        bind:value={countryCode}
                         placeholder="Code"
-                        class="w-full h-14 text-center text-xl bg-white/5 border-b-2 border-white/20 focus:border-white/50 text-white placeholder-gray-400 focus:outline-none transition-all rounded-lg"
+                        class="relative w-full h-14 text-center text-xl bg-transparent border border-white/20 focus:border-white/40 text-white placeholder-gray-400 focus:outline-none transition-all rounded-xl backdrop-blur-sm"
                     />
                 </div>
-                <div class="w-3/4">
+                <div class="w-3/4 relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 rounded-xl"></div>
                     <input 
                         type="text" 
-                        bind:value={userPhoneNumber}
+                        bind:value={phoneNumber}
                         placeholder="Phone Number"
-                        class="w-full h-14 text-xl px-4 bg-white/5 border-b-2 border-white/20 focus:border-white/50 text-white placeholder-gray-400 focus:outline-none transition-all rounded-lg"
+                        class="relative w-full h-14 text-xl px-4 bg-transparent border border-white/20 focus:border-white/40 text-white placeholder-gray-400 focus:outline-none transition-all rounded-xl backdrop-blur-sm"
                     />
                 </div>
             </div>
@@ -110,14 +112,57 @@
             {/if}
 
             <button 
-                on:click={handleOTPRequest}
+                on:click={requestOTP}
                 disabled={isLoading}
-                class="w-full bg-gradient-to-r from-white via-gray-200 to-white text-black rounded-2xl px-8 py-3 mt-8 font-medium transition-all duration-300 hover:opacity-90 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed"
+                class="group relative w-full overflow-hidden rounded-2xl px-8 py-3 mt-8 font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                {isLoading ? 'Requesting...' : 'Request OTP'}
+                <!-- Gradient background -->
+                <div class="absolute inset-0 bg-gradient-to-r from-white via-gray-200 to-white opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+                
+                <!-- Animated border -->
+                <div class="absolute inset-0 rounded-2xl border border-white/20 group-hover:border-white/40 transition-colors duration-300"></div>
+                
+                <!-- Content -->
+                <div class="relative flex items-center justify-center gap-2">
+                    <span class="text-black font-semibold">
+                        {isLoading ? 'Requesting...' : 'Request OTP'}
+                    </span>
+                    {#if !isLoading}
+                        <svg 
+                            class="w-5 h-5 text-black transform group-hover:translate-x-1 transition-transform duration-300" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path 
+                                stroke-linecap="round" 
+                                stroke-linejoin="round" 
+                                stroke-width="2" 
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"
+                            />
+                        </svg>
+                    {/if}
+                </div>
             </button>
         </div>
     </div>
 </div>
 
+<style>
+    /* Remove spinner buttons from number inputs */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 
+    /* Remove background color when autofilled */
+    input:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+    }
+
+    /* Add subtle glow effect on focus */
+    input:focus {
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+    }
+</style>

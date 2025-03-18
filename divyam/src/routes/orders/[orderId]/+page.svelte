@@ -4,7 +4,6 @@
     import { page } from '$app/stores';
     import { goto } from '$app/navigation';
     import { get } from 'svelte/store';
-    import Logo from '../../../assets/Logo.svg';
 
     let order = null;
     let loading = true;
@@ -96,88 +95,179 @@
 
     onMount(fetchOrderDetails);
 </script>
-<div class="p-6">
-        <!-- Logo header -->
 
-    {#if loading}
-        <div class="text-center p-4">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-            <p class="mt-2">Loading order details...</p>
-        </div>
-    {:else if error}
-        <div class="text-red-500 text-center p-4 bg-red-50 rounded-lg">{error}</div>
-    {:else if order}
-    <div class="flex gap-x-2 p-5">
-        <img src={Logo} alt="Logo"> 
-        <h1 class="text-[1.3rem] font-bold">MIGHTY X ABRA</h1>
-    </div>
-        <div class="flex justify-center items-center">
-        <div class="bg-white w-[500px] mt-20 rounded-lg shadow-md p-[40px] space-y-8">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-semibold">Order Details</h2>
-                <h2 class="text-2xl font-semibold">Price</h2>
-            </div>
-            <div class="border-b-2 border-gray-200"></div>
-            <div class="flex justify-between py-4">         
-                <div class="space-y-3">
-                    <h2 class="text-xl font-semibold">{order.offer.name}</h2>
-                    <h3 class="text-sm text-gray-500">Quantity: {order.quantity}</h3>
-                    <h3 class="text-sm text-gray-500">Order ID: {order.order.id}</h3>
-                    <h3 class="text-sm text-gray-500">Reference: {order.offer.reference}</h3>
-                </div>
-                <div class="space-y-3 text-right">
-                    <h2 class="text-lg">Price: ${order.price.toFixed(2)}</h2>
-                    <h2 class="text-lg">VAT: ${Number(order.vat).toFixed(2)}</h2>
-                    <h2 class="text-xl font-semibold">Total: ${(Number(order.price) + Number(order.vat)).toFixed(2)}</h2>
-                </div>
-            </div>
-            <div class="border-b-2 border-gray-200"></div>
-            <div class="flex justify-around gap-4 pt-4">
-                <button 
-                    on:click={() => goto('/orders')} 
-                    class="w-full text-black hover:text-white hover:bg-black bg-white border-2 px-4 py-3 border-black rounded-lg transition-colors duration-200"
-                >
-                    Back to Orders
-                </button>
-
-                <button 
-                    on:click={handleCancelOrder} 
-                    class="w-full text-red-500 bg-white border-2 px-4 py-3 border-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-colors duration-200"
-                >
-                    Cancel Order
-                </button>
-            </div>
+<div class="min-h-screen flex flex-col px-4 sm:px-6 relative">
+    <!-- Gradient overlay -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/50 pointer-events-none"></div>
+    
+    <!-- Logo header -->
+    <div class="fixed top-0 w-full flex items-center justify-between p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10 z-50">
+        <div class="flex items-center gap-4">
+            <img src="/src/assets/Logo.svg" alt="Logo" class="h-8 w-auto filter invert"> 
         </div>
     </div>
-    {:else}
-        <div class="text-center p-4 bg-gray-50 rounded-lg">Order not found</div>
-    {/if}
+
+    <!-- Content -->
+    <div class="flex-1 flex items-center justify-center pt-[72px]">
+        {#if loading}
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+                <p class="mt-2 text-white/70">Loading order details...</p>
+            </div>
+        {:else if error}
+            <div class="text-red-400 text-sm p-4 bg-red-500/10 backdrop-blur-lg rounded-3xl border border-red-500/20 max-w-md w-full">
+                {error}
+            </div>
+        {:else if order}
+            <div class="relative z-10 max-w-2xl w-full">
+                <div class="bg-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent mb-8">
+                        Order Details
+                    </h1>
+
+                    <!-- Order Info -->
+                    <div class="space-y-6">
+                        <!-- Header -->
+                        <div class="flex justify-between items-center pb-4 border-b border-white/10">
+                            <div class="text-white/70">Order ID</div>
+                            <div class="text-white font-medium">{order.order.id}</div>
+                        </div>
+
+                        <!-- Item Details -->
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-start">
+                                <div class="space-y-1">
+                                    <h2 class="text-xl text-white font-medium">{order.offer.name}</h2>
+                                    <p class="text-white/70">Reference: {order.offer.reference}</p>
+                                    <p class="text-white/70">Quantity: {order.quantity}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price Breakdown -->
+                        <div class="space-y-3 pt-4 border-t border-white/10">
+                            <div class="flex justify-between">
+                                <span class="text-white/70">Price</span>
+                                <span class="text-white">${order.price.toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-white/70">VAT</span>
+                                <span class="text-white">${Number(order.vat).toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between pt-2 border-t border-white/10">
+                                <span class="text-white font-medium">Total</span>
+                                <span class="text-white font-medium">${(Number(order.price) + Number(order.vat)).toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-4 pt-8">
+                            <button 
+                                on:click={() => goto('/orders')}
+                                class="group relative flex-1 overflow-hidden rounded-2xl px-6 py-3 transition-all duration-300"
+                            >
+                                <!-- Gradient background -->
+                                <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 group-hover:opacity-75 transition-opacity duration-300"></div>
+                                
+                                <!-- Animated border -->
+                                <div class="absolute inset-0 rounded-2xl border border-white/20 group-hover:border-white/40 transition-colors duration-300"></div>
+                                
+                                <!-- Content -->
+                                <div class="relative flex items-center justify-center">
+                                    <span class="text-white font-medium">Back to Orders</span>
+                                </div>
+                            </button>
+
+                            <button 
+                                on:click={handleCancelOrder}
+                                class="group relative flex-1 overflow-hidden rounded-2xl px-6 py-3 transition-all duration-300"
+                            >
+                                <!-- Gradient background -->
+                                <div class="absolute inset-0 bg-gradient-to-r from-red-500/20 to-red-600/20 group-hover:opacity-75 transition-opacity duration-300"></div>
+                                
+                                <!-- Animated border -->
+                                <div class="absolute inset-0 rounded-2xl border border-red-500/20 group-hover:border-red-500/40 transition-colors duration-300"></div>
+                                
+                                <!-- Content -->
+                                <div class="relative flex items-center justify-center">
+                                    <span class="text-red-400 font-medium">Cancel Order</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {:else}
+            <div class="text-white/70 text-center">Order not found</div>
+        {/if}
+    </div>
+</div>
 
 <!-- Confirmation Modal -->
 {#if showCancelModal}
-    <div class="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-xl">
-            <h2 class="text-2xl font-bold mb-4">Cancel Order</h2>
-            <p class="text-gray-600 mb-6">
+    <div class="fixed inset-0 backdrop-blur-xl bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl max-w-md w-full mx-4">
+            <h2 class="text-2xl font-bold text-white mb-4">Cancel Order</h2>
+            <p class="text-white/70 mb-6">
                 Are you sure you want to cancel this order?<br>
                 This action cannot be undone.
             </p>
             <div class="flex gap-4">
                 <button 
                     on:click={closeModal}
-                    class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                    class="group relative flex-1 overflow-hidden rounded-2xl px-6 py-3 transition-all duration-300"
                 >
-                    No, Keep Order
+                    <!-- Gradient background -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 group-hover:opacity-75 transition-opacity duration-300"></div>
+                    
+                    <!-- Animated border -->
+                    <div class="absolute inset-0 rounded-2xl border border-white/20 group-hover:border-white/40 transition-colors duration-300"></div>
+                    
+                    <!-- Content -->
+                    <div class="relative flex items-center justify-center">
+                        <span class="text-white font-medium">Keep Order</span>
+                    </div>
                 </button>
+
                 <button 
                     on:click={confirmCancel}
-                    class="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
                     disabled={cancelling}
+                    class="group relative flex-1 overflow-hidden rounded-2xl px-6 py-3 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {cancelling ? 'Cancelling...' : 'Yes, Cancel Order'}
+                    <!-- Gradient background -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-red-500/20 to-red-600/20 group-hover:opacity-75 transition-opacity duration-300"></div>
+                    
+                    <!-- Animated border -->
+                    <div class="absolute inset-0 rounded-2xl border border-red-500/20 group-hover:border-red-500/40 transition-colors duration-300"></div>
+                    
+                    <!-- Content -->
+                    <div class="relative flex items-center justify-center">
+                        <span class="text-red-400 font-medium">
+                            {cancelling ? 'Cancelling...' : 'Cancel Order'}
+                        </span>
+                    </div>
                 </button>
             </div>
         </div>
     </div>
 {/if}
-</div>
+
+<style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+</style>

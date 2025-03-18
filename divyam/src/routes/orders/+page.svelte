@@ -3,17 +3,11 @@
     import { authStore } from '$lib/stores/authStore.js';
     import { goto } from '$app/navigation';
     import { get } from 'svelte/store';
-    import SideBar from '$lib/components/SideBar.svelte';
-    import Logo from '../../assets/Logo.svg';
 
-    // State variables with more descriptive names
+    // State variables
     let orderList = [];
-    let filteredOrderList = [];
-    let searchQuery = '';
-    let selectedStatus = '';
     let isLoading = true;
     let errorMessage = null;
-    let isSidebarOpen = false;
 
     // Constants
     const API_ENDPOINT = '/api/v2/orders';
@@ -22,33 +16,13 @@
         'Accept': 'application/json'
     };
 
-    const ORDER_STATUS_OPTIONS = [
-        { id: '', label: 'All Statuses' },
-        { id: '0', label: 'Cancelled' },
-        { id: '9', label: 'Paid' },
-        { id: '10', label: 'Pending Payment' },
-        { id: '12', label: 'Fulfilled' }
-    ];
-
     const STATUS_STYLES = {
-        '0': 'bg-red-500/20 text-red-400 border border-red-500/30',
-        '9': 'bg-green-500/20 text-green-400 border border-green-500/30',
-        '10': 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
-        '12': 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
-        'default': 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+        '0': 'bg-white/5 text-white/90 border-white/20',  // Cancelled
+        '9': 'bg-white/10 text-white/90 border-white/20', // Paid
+        '10': 'bg-white/5 text-white/90 border-white/20', // Pending Payment
+        '12': 'bg-white/10 text-white/90 border-white/20', // Fulfilled
+        'default': 'bg-white/5 text-white/90 border-white/20'
     };
-
-    // Reactive statement for filtering orders
-    $: {
-        if (orderList) {
-            filteredOrderList = orderList.filter(order => {
-                const customerName = order.customer?.name || 'Anonymous';
-                const matchesSearch = customerName.toLowerCase().includes(searchQuery.toLowerCase());
-                const matchesStatus = !selectedStatus || order.status.id.toString() === selectedStatus;
-                return matchesSearch && matchesStatus;
-            });
-        }
-    }
 
     // Utility functions
     function formatDate(dateString) {
@@ -68,8 +42,13 @@
     }
 
     function getStatusLabel(statusId) {
-        const status = ORDER_STATUS_OPTIONS.find(s => s.id === statusId.toString());
-        return status ? status.label : 'Unknown';
+        const STATUS_LABELS = {
+            '0': 'Cancelled',
+            '9': 'Paid',
+            '10': 'Pending Payment',
+            '12': 'Fulfilled'
+        };
+        return STATUS_LABELS[statusId] || 'Unknown';
     }
 
     function getStatusStyle(statusId) {
@@ -86,11 +65,6 @@
             console.error('Error formatting amount:', error);
             return '0.00';
         }
-    }
-
-    // Event handlers
-    function handleSidebarToggle() {
-        isSidebarOpen = !isSidebarOpen;
     }
 
     function handleOrderClick(order) {
@@ -144,7 +118,6 @@
 
         try {
             orderList = await fetchOrders(auth.token);
-            filteredOrderList = orderList;
         } catch (error) {
             console.error('Error fetching orders:', error);
             errorMessage = error.message || 'Network error. Please try again.';
@@ -154,37 +127,50 @@
     });
 </script>
 
-<div class="flex h-screen bg-black overflow-hidden">
-    <SideBar 
-        bind:showMenu={isSidebarOpen}
-        on:toggleMenu={handleSidebarToggle}
-    />
-    
+<!-- Logo header -->
+<div class="fixed top-0 w-full flex items-center justify-between p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10 z-50">
+    <div class="flex items-center gap-4">
+        <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert"> 
+    </div>
+    <button 
+        on:click={() => {
+            authStore.set(null);
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('authToken');
+            }
+            goto('/auth/request-otp');
+        }}
+        class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 text-white/90 hover:text-white"
+    >
+        <span>Logout</span>
+        <svg 
+            class="w-5 h-5" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+        >
+            <path 
+                stroke-linecap="round" 
+                stroke-linejoin="round" 
+                stroke-width="2" 
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            />
+        </svg>
+    </button>
+</div>
+
+<div class="flex h-screen bg-black overflow-hidden pt-[72px]">
     <div class="flex-1 flex flex-col w-full relative overflow-hidden">
         <!-- Gradient overlay -->
-        <div class="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black pointer-events-none"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/50 pointer-events-none"></div>
         
         <!-- Content wrapper -->
-        <div class="relative z-10 flex flex-col h-full">
-            <!-- Mobile Header -->
-            <div class="sm:hidden flex items-center justify-between p-4 bg-black/30 backdrop-blur-lg border-b border-white/10">
-                <div class="flex items-center gap-x-2">
-                    <img src={Logo} alt="Logo" class="h-6 w-auto filter invert"> 
-                    <h1 class="text-[1.1rem] font-bold text-white">DIVYAM</h1>
-                </div>
-                <button 
-                    class="p-2 hover:bg-white/5 rounded-xl transition-all duration-300"
-                    on:click={handleSidebarToggle}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Desktop Header -->
-            <div class="hidden sm:block p-6 pb-0">
-                <h1 class="text-2xl font-bold text-white mb-6">Today's Orders</h1>
+        <div class="relative z-10 flex flex-col h-full px-4 sm:px-6">
+            <!-- Header -->
+            <div class="py-6">
+                <h1 class="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+                    Today's Orders
+                </h1>
             </div>
                 
             {#if isLoading}
@@ -195,91 +181,127 @@
                     </div>
                 </div>
             {:else if errorMessage}
-                <div class="flex-1 flex items-center justify-center px-4">
-                    <div class="text-red-400 text-center p-4 bg-red-500/10 backdrop-blur-lg rounded-lg border border-red-500/20 max-w-md w-full">
+                <div class="flex-1 flex items-center justify-center">
+                    <div class="text-red-400 text-sm p-4 bg-red-500/10 backdrop-blur-lg rounded-3xl border border-red-500/20 max-w-md w-full">
                         {errorMessage}
                     </div>
                 </div>
             {:else}
-                <!-- Search and Filter Section -->
-                <div class="p-4 space-y-3">
-                    <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-4 space-y-3 border border-white/10">
-                        <input 
-                            type="text" 
-                            class="w-full p-3 bg-white/5 border border-white/20 rounded-xl text-sm text-white placeholder-gray-400 focus:border-white/40 focus:outline-none transition-all" 
-                            placeholder="Search orders by customer name" 
-                            bind:value={searchQuery}
-                        />
-
-                        <select 
-                            class="w-full p-3 bg-white/5 border border-white/20 rounded-xl text-sm text-white focus:border-white/40 focus:outline-none transition-all appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgZmlsbD0ibm9uZSIgdmlld0JveD0iMCAwIDI0IDI0IiBzdHJva2U9IndoaXRlIj48cGF0aCBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iMiIgZD0iTTE5IDlsLTcgNy03LTciLz48L3N2Zz4=')] bg-no-repeat bg-[right_0.75rem_center] bg-[length:1rem]" 
-                            bind:value={selectedStatus}
-                        >
-                            {#each ORDER_STATUS_OPTIONS as status}
-                                <option class="bg-black text-white" value={status.id}>{status.label}</option>
-                            {/each}
-                        </select>
+                <!-- Category Headers - Desktop -->
+                <div class="hidden sm:grid grid-cols-6 gap-4 mb-4">
+                    <div class="col-span-2">
+                        <div class="bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
+                            <span class="text-sm font-medium text-white/70">Customer</span>
+                        </div>
                     </div>
-
-                    <!-- Desktop Table Header -->
-                    <div class="hidden sm:grid grid-cols-6 gap-4 px-4 py-2 text-sm font-medium text-gray-300 bg-white/5 backdrop-blur-lg rounded-xl border border-white/10">
-                        <div class="col-span-2">Customer</div>
-                        <div class="text-center">Created</div>
-                        <div class="text-center">Kiosk</div>
-                        <div class="text-center">Status</div>
-                        <div class="text-center">Amount</div>
+                    <div>
+                        <div class="bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10 text-center">
+                            <span class="text-sm font-medium text-white/70">Created</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10 text-center">
+                            <span class="text-sm font-medium text-white/70">Kiosk</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10 text-center">
+                            <span class="text-sm font-medium text-white/70">Status</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10 text-center">
+                            <span class="text-sm font-medium text-white/70">Amount</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Orders List -->
-                <div class="flex-1 overflow-y-auto px-4 pb-4">
-                    <div class="grid gap-3">
-                        {#each filteredOrderList as order}
-                            <div 
-                                class="bg-white/5 backdrop-blur-xl p-4 rounded-xl border border-white/10 cursor-pointer hover:bg-white/10 transition-all"
-                                on:click={() => handleOrderClick(order)}
-                            >
-                                <div class="sm:hidden space-y-2">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-white/70">Customer:</span>
-                                        <span class="text-white">{order.customer?.name || 'Anonymous'}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-white/70">Created:</span>
-                                        <span class="text-white">{formatDate(order.createdAt)}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-white/70">Kiosk:</span>
-                                        <span class="text-white">{order.kiosk?.name || 'N/A'}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-white/70">Status:</span>
-                                        <span class="px-2 py-1 rounded-full text-sm {getStatusStyle(order.status.id)}">
-                                            {getStatusLabel(order.status.id)}
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-white/70">Amount:</span>
-                                        <span class="text-white">{formatAmount(order.total)}</span>
-                                    </div>
+                <div class="flex-1 overflow-y-auto space-y-4 py-4">
+                    {#each orderList as order}
+                        <div 
+                            class="group bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 cursor-pointer hover:bg-white/10 transition-all shadow-2xl relative"
+                            on:click={() => handleOrderClick(order)}
+                        >
+                            <!-- Mobile View -->
+                            <div class="sm:hidden space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-white/70">Customer</span>
+                                    <span class="text-white font-medium">{order.customer?.name || 'Anonymous'}</span>
                                 </div>
-
-                                <div class="hidden sm:grid grid-cols-6 gap-4 items-center">
-                                    <div class="col-span-2 text-white">{order.customer?.name || 'Anonymous'}</div>
-                                    <div class="text-center text-white">{formatDate(order.createdAt)}</div>
-                                    <div class="text-center text-white">{order.kiosk?.name || 'N/A'}</div>
-                                    <div class="text-center">
-                                        <span class="px-2 py-1 rounded-full text-sm {getStatusStyle(order.status.id)}">
-                                            {getStatusLabel(order.status.id)}
-                                        </span>
-                                    </div>
-                                    <div class="text-center text-white">{formatAmount(order.total)}</div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-white/70">Created</span>
+                                    <span class="text-white font-medium">{formatDate(order.createdAt)}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-white/70">Kiosk</span>
+                                    <span class="text-white font-medium">{order.kiosk?.name || 'N/A'}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-white/70">Status</span>
+                                    <span class="backdrop-blur-md px-4 py-1.5 rounded-xl text-sm font-medium border transition-all hover:bg-white/10 {getStatusStyle(order.status.id)}">
+                                        {getStatusLabel(order.status.id)}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-white/70">Amount</span>
+                                    <span class="text-white font-medium">{formatAmount(order.amount)}</span>
                                 </div>
                             </div>
-                        {/each}
-                    </div>
+
+                            <!-- Desktop View -->
+                            <div class="hidden sm:grid grid-cols-6 gap-4 items-center">
+                                <div class="col-span-2 text-white font-medium">{order.customer?.name || 'Anonymous'}</div>
+                                <div class="text-center text-white font-medium">{formatDate(order.createdAt)}</div>
+                                <div class="text-center text-white font-medium">{order.kiosk?.name || 'N/A'}</div>
+                                <div class="text-center">
+                                    <span class="inline-block backdrop-blur-md px-4 py-1.5 rounded-xl text-sm font-medium border transition-all hover:bg-white/10 {getStatusStyle(order.status.id)}">
+                                        {getStatusLabel(order.status.id)}
+                                    </span>
+                                </div>
+                                <div class="text-center text-white font-medium">{formatAmount(order.amount)}</div>
+                            </div>
+
+                            <!-- Arrow icon -->
+                            <div class="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                <svg 
+                                    class="w-5 h-5 text-white transform group-hover:translate-x-1 transition-transform duration-300" 
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path 
+                                        stroke-linecap="round" 
+                                        stroke-linejoin="round" 
+                                        stroke-width="2" 
+                                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
+                    {/each}
                 </div>
             {/if}
         </div>
     </div>
 </div>
+
+<style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+</style>
