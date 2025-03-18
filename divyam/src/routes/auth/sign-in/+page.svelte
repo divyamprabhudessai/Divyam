@@ -118,7 +118,11 @@
 <!-- Logo header -->
 <div class="fixed top-0 w-full flex items-center justify-between p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10 z-50">
     <div class="flex items-center gap-4">
-        <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert"> 
+        <img 
+            src="https://img.hotimg.com/allmighty_logo-removebg-preview.png" 
+            alt="Logo" 
+            class="h-12 sm:h-14 w-auto brightness-0 invert opacity-90 hover:opacity-100 transition-opacity duration-200"
+        > 
     </div>
     <a 
         href="/"

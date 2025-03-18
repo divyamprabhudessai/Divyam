@@ -12,7 +12,7 @@
     // Constants
     const API_ENDPOINT = '/api/v2/orders';
     const API_HEADERS = {
-        'Content-Type': 'application/json',
+                    'Content-Type': 'application/json',
         'Accept': 'application/json'
     };
 
@@ -28,12 +28,11 @@
     function formatDate(dateString) {
         try {
             if (!dateString) return 'N/A';
-            return new Date(dateString).toLocaleDateString(undefined, {
+            const date = new Date(dateString);
+            return date.toLocaleDateString(undefined, {
                 year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+                month: '2-digit',
+                day: '2-digit'
             });
         } catch (error) {
             console.error('Error formatting date:', error);
@@ -75,6 +74,13 @@
         goto(`/orders/${order.id}`);
     }
 
+    // Add logout function
+    function handleLogout() {
+        authStore.set(null);
+        localStorage.removeItem('authToken');
+        goto('/');
+    }
+
     // API functions
     async function fetchOrders(authToken, period = 'TODAY') {
         const queryParams = new URLSearchParams({
@@ -97,7 +103,9 @@
         }
 
         if (response.ok) {
-            return await response.json();
+            const orders = await response.json();
+            console.log('Fetched orders:', orders);
+            return orders;
         }
 
         if (response.status === 404 && period === 'TODAY') {
@@ -127,47 +135,15 @@
     });
 </script>
 
-<div class="min-h-screen flex flex-col px-4 sm:px-6 relative">
+<div class="min-h-screen flex flex-col relative">
     <!-- Gradient overlay -->
     <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/50 pointer-events-none"></div>
     
-    <!-- Logo header -->
-    <div class="fixed top-0 w-full flex items-center justify-between p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10 z-50">
-        <div class="flex items-center gap-4">
-            <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert"> 
-        </div>
-        <button 
-            on:click={() => {
-                authStore.set(null);
-                if (typeof window !== 'undefined') {
-                    localStorage.removeItem('authToken');
-                }
-                goto('/');
-            }}
-            class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 text-white/90 hover:text-white"
-        >
-            <span>Logout</span>
-            <svg 
-                class="w-5 h-5" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-            >
-                <path 
-                    stroke-linecap="round" 
-                    stroke-linejoin="round" 
-                    stroke-width="2" 
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-            </svg>
-        </button>
-    </div>
-
     <!-- Content -->
-    <div class="flex-1 pt-[72px]">
-        <div class="max-w-7xl mx-auto">
+    <div class="flex-1">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <!-- Today's Orders Section -->
-            <div class="relative z-10">
+            <div class="relative z-10 mt-[8vw]">
                 <div class="bg-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl">
                     <h1 class="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent mb-8">
                         Today's Orders
@@ -176,16 +152,16 @@
                     <!-- Orders List -->
                     {#if isLoading}
                         <div class="text-center py-8">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
-                            <p class="mt-2 text-white/70">Loading orders...</p>
-                        </div>
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+                        <p class="mt-2 text-white/70">Loading orders...</p>
+                    </div>
                     {:else if errorMessage}
                         <div class="text-red-400 text-sm p-4 bg-red-500/10 backdrop-blur-lg rounded-3xl border border-red-500/20">
                             {errorMessage}
-                        </div>
+                </div>
                     {:else if orderList.length === 0}
                         <div class="text-white/70 text-center py-8">No orders found</div>
-                    {:else}
+            {:else}
                         <!-- Column Headers -->
                         <div class="hidden md:grid grid-cols-6 gap-4 px-6 py-3 mb-4 bg-white/5 backdrop-blur-sm rounded-2xl">
                             <div class="col-span-2 text-white/70 font-medium">Customer</div>
@@ -193,54 +169,65 @@
                             <div class="text-white/70 font-medium text-center">Kiosk</div>
                             <div class="text-white/70 font-medium text-center">Status</div>
                             <div class="text-white/70 font-medium text-right">Amount</div>
-                        </div>
+                    </div>
 
                         <!-- Orders -->
-                        <div class="space-y-3">
+                        <div class="space-y-3 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2">
                             {#each orderList as order}
-                                <button 
-                                    on:click={() => handleOrderClick(order)}
+                            <button 
+                                on:click={() => handleOrderClick(order)}
                                     class="w-full group"
                                 >
                                     <div class="grid grid-cols-1 md:grid-cols-6 gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300">
                                         <!-- Mobile: Stacked Layout -->
                                         <div class="md:hidden space-y-3">
                                             <div class="flex justify-between items-center">
-                                                <div class="text-white font-medium">{order.customer?.name || 'Anonymous'}</div>
-                                                <div class="text-white/70">{formatAmount(order.amount)}</div>
+                                                <span class="text-white/70">Customer</span>
+                                                <span class="text-white font-medium">{order.customer?.name || 'Anonymous'}</span>
                                             </div>
                                             <div class="flex justify-between items-center">
-                                                <div class="text-white/70">{order.kiosk?.name || 'N/A'}</div>
-                                                <div class="backdrop-blur-md px-4 py-1.5 rounded-xl text-sm font-medium border transition-all {getStatusStyle(order.status.id)}">
-                                                    {getStatusLabel(order.status.id)}
-                                                </div>
+                                                <span class="text-white/70">Date</span>
+                                                <span class="text-white font-medium">{formatDate(order.created?.at)}</span>
                                             </div>
-                                            <div class="text-white/50 text-sm">{formatDate(order.createdAt)}</div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-white/70">Kiosk</span>
+                                                <span class="text-white font-medium">{order.kiosk?.code || 'N/A'}</span>
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-white/70">Status</span>
+                                                <span class="backdrop-blur-md px-4 py-1.5 rounded-xl text-sm font-medium border transition-all {getStatusStyle(order.status.id)}">
+                                                    {getStatusLabel(order.status.id)}
+                                                </span>
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-white/70">Amount</span>
+                                                <span class="text-white font-medium">{formatAmount(order.amount)}</span>
+                                            </div>
                                         </div>
 
                                         <!-- Desktop: Grid Layout -->
                                         <div class="hidden md:block col-span-2 text-white">
                                             <div class="font-medium">{order.customer?.name || 'Anonymous'}</div>
-                                            <div class="text-white/70 text-sm">{order.customer?.phone || 'N/A'}</div>
+                                            <div class="text-white/70 text-sm">{order.customer?.phone?.number || 'N/A'}</div>
+                                    </div>
+                                        <div class="hidden md:flex items-center justify-center text-white font-medium">
+                                            {formatDate(order.created?.at)}
                                         </div>
-                                        <div class="hidden md:flex items-center justify-center text-white/70">
-                                            {formatDate(order.createdAt)}
-                                        </div>
-                                        <div class="hidden md:flex items-center justify-center text-white/70">
-                                            {order.kiosk?.name || 'N/A'}
-                                        </div>
+                                        <div class="hidden md:flex items-center justify-center text-white font-medium">
+                                            {order.kiosk?.code || 'N/A'}
+                                    </div>
                                         <div class="hidden md:flex items-center justify-center">
                                             <span class="backdrop-blur-md px-4 py-1.5 rounded-xl text-sm font-medium border transition-all {getStatusStyle(order.status.id)}">
                                                 {getStatusLabel(order.status.id)}
-                                            </span>
-                                        </div>
-                                        <div class="hidden md:flex items-center justify-end text-white">
+                                        </span>
+                                    </div>
+                                        <div class="hidden md:flex items-center justify-end text-white font-medium">
                                             {formatAmount(order.amount)}
                                         </div>
-                                    </div>
-                                </button>
-                            {/each}
-                        </div>
+                                </div>
+                            </button>
+                        {/each}
+                    </div>
                     {/if}
                 </div>
             </div>

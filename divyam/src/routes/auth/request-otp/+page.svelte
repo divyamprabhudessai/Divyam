@@ -58,7 +58,11 @@
     <!-- Logo header -->
     <div class="fixed top-0 w-full flex items-center justify-between p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10 z-50">
         <div class="flex items-center gap-4">
-            <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert"> 
+            <img 
+                src="https://img.hotimg.com/allmighty_logo-removebg-preview.png" 
+                alt="Logo" 
+                class="h-12 sm:h-14 w-auto brightness-0 invert opacity-90 hover:opacity-100 transition-opacity duration-200"
+            > 
         </div>
         <a 
             href="/"
@@ -89,22 +93,22 @@
             </h1>
 
             <div class="relative flex gap-4 mb-6">
-                <div class="w-1/4 relative">
+                <div class="w-1/3 relative">
                     <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 rounded-xl"></div>
                     <input 
                         type="text" 
                         bind:value={countryCode}
                         placeholder="Code"
-                        class="relative w-full h-14 text-center text-xl bg-transparent border border-white/20 focus:border-white/40 text-white placeholder-gray-400 focus:outline-none transition-all rounded-xl backdrop-blur-sm"
+                        class="relative w-full h-16 text-center text-xl bg-transparent border border-white/20 focus:border-white/40 text-white placeholder-gray-400 focus:outline-none transition-all rounded-xl backdrop-blur-sm"
                     />
                 </div>
-                <div class="w-3/4 relative">
+                <div class="w-2/3 relative">
                     <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 rounded-xl"></div>
                     <input 
                         type="text" 
                         bind:value={phoneNumber}
                         placeholder="Phone Number"
-                        class="relative w-full h-14 text-xl px-4 bg-transparent border border-white/20 focus:border-white/40 text-white placeholder-gray-400 focus:outline-none transition-all rounded-xl backdrop-blur-sm"
+                        class="relative w-full h-16 text-xl px-4 bg-transparent border border-white/20 focus:border-white/40 text-white placeholder-gray-400 focus:outline-none transition-all rounded-xl backdrop-blur-sm"
                     />
                 </div>
             </div>

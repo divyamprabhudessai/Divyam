@@ -93,6 +93,12 @@
         cancelling = false;
     }
 
+    function handleLogout() {
+        authStore.set(null);
+        localStorage.removeItem('authToken');
+        goto('/');
+    }
+
     onMount(fetchOrderDetails);
 </script>
 
@@ -100,40 +106,8 @@
     <!-- Gradient overlay -->
     <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/50 pointer-events-none"></div>
     
-    <!-- Logo header -->
-    <div class="fixed top-0 w-full flex items-center justify-between p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10 z-50">
-        <div class="flex items-center gap-4">
-            <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert"> 
-        </div>
-        <button 
-            on:click={() => {
-                authStore.set(null);
-                if (typeof window !== 'undefined') {
-                    localStorage.removeItem('authToken');
-                }
-                goto('/');
-            }}
-            class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 text-white/90 hover:text-white"
-        >
-            <span>Logout</span>
-            <svg 
-                class="w-5 h-5" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-            >
-                <path 
-                    stroke-linecap="round" 
-                    stroke-linejoin="round" 
-                    stroke-width="2" 
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-            </svg>
-        </button>
-    </div>
-
     <!-- Content -->
-    <div class="flex-1 flex items-center justify-center pt-[72px]">
+    <div class="flex-1 flex items-center justify-center">
         {#if loading}
             <div class="text-center">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
@@ -144,7 +118,7 @@
                 {error}
             </div>
         {:else if order}
-            <div class="relative z-10 max-w-2xl w-full">
+            <div class="relative z-10 max-w-2xl w-full mt-[8vw]">
                 <div class="bg-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl">
                     <h1 class="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent mb-8">
                         Order Details
@@ -232,15 +206,23 @@
 {#if showCancelModal}
     <div class="fixed inset-0 backdrop-blur-xl bg-black/50 flex items-center justify-center z-50">
         <div class="bg-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl max-w-md w-full mx-4">
-            <h2 class="text-2xl font-bold text-white mb-4">Cancel Order</h2>
-            <p class="text-white/70 mb-6">
-                Are you sure you want to cancel this order?<br>
-                This action cannot be undone.
-            </p>
-            <div class="flex gap-4">
+            <div class="flex justify-center space-x-4">
                 <button 
-                    on:click={closeModal}
-                    class="group relative flex-1 overflow-hidden rounded-2xl px-6 py-3 transition-all duration-300"
+                    on:click={confirmCancel}
+                    disabled={cancelling}
+                    class="group relative overflow-hidden rounded-2xl px-8 py-3 transition-all duration-300 bg-red-500/20 hover:bg-red-500/30"
+                >
+                    <!-- Animated border -->
+                    <div class="absolute inset-0 rounded-2xl border border-red-500/30 group-hover:border-red-500/50 transition-colors duration-300"></div>
+                    
+                    <!-- Content -->
+                    <div class="relative flex items-center justify-center">
+                        <span class="text-red-400 font-medium">{cancelling ? 'Cancelling...' : 'Cancel Order'}</span>
+                    </div>
+                </button>
+                <button 
+                    on:click={() => showCancelModal = false}
+                    class="group relative overflow-hidden rounded-2xl px-8 py-3 transition-all duration-300"
                 >
                     <!-- Gradient background -->
                     <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 group-hover:opacity-75 transition-opacity duration-300"></div>
@@ -251,25 +233,6 @@
                     <!-- Content -->
                     <div class="relative flex items-center justify-center">
                         <span class="text-white font-medium">Keep Order</span>
-                    </div>
-                </button>
-
-                <button 
-                    on:click={confirmCancel}
-                    disabled={cancelling}
-                    class="group relative flex-1 overflow-hidden rounded-2xl px-6 py-3 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <!-- Gradient background -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-red-500/20 to-red-600/20 group-hover:opacity-75 transition-opacity duration-300"></div>
-                    
-                    <!-- Animated border -->
-                    <div class="absolute inset-0 rounded-2xl border border-red-500/20 group-hover:border-red-500/40 transition-colors duration-300"></div>
-                    
-                    <!-- Content -->
-                    <div class="relative flex items-center justify-center">
-                        <span class="text-red-400 font-medium">
-                            {cancelling ? 'Cancelling...' : 'Cancel Order'}
-                        </span>
                     </div>
                 </button>
             </div>
