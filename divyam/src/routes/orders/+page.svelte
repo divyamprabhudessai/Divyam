@@ -127,161 +127,123 @@
     });
 </script>
 
-<!-- Logo header -->
-<div class="fixed top-0 w-full flex items-center justify-between p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10 z-50">
-    <div class="flex items-center gap-4">
-        <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert"> 
-    </div>
-    <button 
-        on:click={() => {
-            authStore.set(null);
-            if (typeof window !== 'undefined') {
-                localStorage.removeItem('authToken');
-            }
-            goto('/auth/request-otp');
-        }}
-        class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 text-white/90 hover:text-white"
-    >
-        <span>Logout</span>
-        <svg 
-            class="w-5 h-5" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
+<div class="min-h-screen flex flex-col px-4 sm:px-6 relative">
+    <!-- Gradient overlay -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/50 pointer-events-none"></div>
+    
+    <!-- Logo header -->
+    <div class="fixed top-0 w-full flex items-center justify-between p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10 z-50">
+        <div class="flex items-center gap-4">
+            <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert"> 
+        </div>
+        <button 
+            on:click={() => {
+                authStore.set(null);
+                if (typeof window !== 'undefined') {
+                    localStorage.removeItem('authToken');
+                }
+                goto('/');
+            }}
+            class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 text-white/90 hover:text-white"
         >
-            <path 
-                stroke-linecap="round" 
-                stroke-linejoin="round" 
-                stroke-width="2" 
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            />
-        </svg>
-    </button>
-</div>
+            <span>Logout</span>
+            <svg 
+                class="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+            >
+                <path 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round" 
+                    stroke-width="2" 
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+            </svg>
+        </button>
+    </div>
 
-<div class="flex h-screen bg-black overflow-hidden pt-[72px]">
-    <div class="flex-1 flex flex-col w-full relative overflow-hidden">
-        <!-- Gradient overlay -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/50 pointer-events-none"></div>
-        
-        <!-- Content wrapper -->
-        <div class="relative z-10 flex flex-col h-full px-4 sm:px-6">
-            <!-- Header -->
-            <div class="py-6">
-                <h1 class="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
-                    Today's Orders
-                </h1>
-            </div>
-                
-            {#if isLoading}
-                <div class="flex-1 flex items-center justify-center">
-                    <div class="text-center">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
-                        <p class="mt-2 text-white/70">Loading orders...</p>
-                    </div>
-                </div>
-            {:else if errorMessage}
-                <div class="flex-1 flex items-center justify-center">
-                    <div class="text-red-400 text-sm p-4 bg-red-500/10 backdrop-blur-lg rounded-3xl border border-red-500/20 max-w-md w-full">
-                        {errorMessage}
-                    </div>
-                </div>
-            {:else}
-                <!-- Category Headers - Desktop -->
-                <div class="hidden sm:grid grid-cols-6 gap-4 mb-4">
-                    <div class="col-span-2">
-                        <div class="bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
-                            <span class="text-sm font-medium text-white/70">Customer</span>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10 text-center">
-                            <span class="text-sm font-medium text-white/70">Created</span>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10 text-center">
-                            <span class="text-sm font-medium text-white/70">Kiosk</span>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10 text-center">
-                            <span class="text-sm font-medium text-white/70">Status</span>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10 text-center">
-                            <span class="text-sm font-medium text-white/70">Amount</span>
-                        </div>
-                    </div>
-                </div>
+    <!-- Content -->
+    <div class="flex-1 pt-[72px]">
+        <div class="max-w-7xl mx-auto">
+            <!-- Today's Orders Section -->
+            <div class="relative z-10">
+                <div class="bg-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent mb-8">
+                        Today's Orders
+                    </h1>
 
-                <!-- Orders List -->
-                <div class="flex-1 overflow-y-auto space-y-4 py-4">
-                    {#each orderList as order}
-                        <div 
-                            class="group bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 cursor-pointer hover:bg-white/10 transition-all shadow-2xl relative"
-                            on:click={() => handleOrderClick(order)}
-                        >
-                            <!-- Mobile View -->
-                            <div class="sm:hidden space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-white/70">Customer</span>
-                                    <span class="text-white font-medium">{order.customer?.name || 'Anonymous'}</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-white/70">Created</span>
-                                    <span class="text-white font-medium">{formatDate(order.createdAt)}</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-white/70">Kiosk</span>
-                                    <span class="text-white font-medium">{order.kiosk?.name || 'N/A'}</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-white/70">Status</span>
-                                    <span class="backdrop-blur-md px-4 py-1.5 rounded-xl text-sm font-medium border transition-all hover:bg-white/10 {getStatusStyle(order.status.id)}">
-                                        {getStatusLabel(order.status.id)}
-                                    </span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-white/70">Amount</span>
-                                    <span class="text-white font-medium">{formatAmount(order.amount)}</span>
-                                </div>
-                            </div>
+                    <!-- Orders List -->
+                    {#if isLoading}
+                        <div class="text-center py-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+                            <p class="mt-2 text-white/70">Loading orders...</p>
+                        </div>
+                    {:else if errorMessage}
+                        <div class="text-red-400 text-sm p-4 bg-red-500/10 backdrop-blur-lg rounded-3xl border border-red-500/20">
+                            {errorMessage}
+                        </div>
+                    {:else if orderList.length === 0}
+                        <div class="text-white/70 text-center py-8">No orders found</div>
+                    {:else}
+                        <!-- Column Headers -->
+                        <div class="hidden md:grid grid-cols-6 gap-4 px-6 py-3 mb-4 bg-white/5 backdrop-blur-sm rounded-2xl">
+                            <div class="col-span-2 text-white/70 font-medium">Customer</div>
+                            <div class="text-white/70 font-medium text-center">Created</div>
+                            <div class="text-white/70 font-medium text-center">Kiosk</div>
+                            <div class="text-white/70 font-medium text-center">Status</div>
+                            <div class="text-white/70 font-medium text-right">Amount</div>
+                        </div>
 
-                            <!-- Desktop View -->
-                            <div class="hidden sm:grid grid-cols-6 gap-4 items-center">
-                                <div class="col-span-2 text-white font-medium">{order.customer?.name || 'Anonymous'}</div>
-                                <div class="text-center text-white font-medium">{formatDate(order.createdAt)}</div>
-                                <div class="text-center text-white font-medium">{order.kiosk?.name || 'N/A'}</div>
-                                <div class="text-center">
-                                    <span class="inline-block backdrop-blur-md px-4 py-1.5 rounded-xl text-sm font-medium border transition-all hover:bg-white/10 {getStatusStyle(order.status.id)}">
-                                        {getStatusLabel(order.status.id)}
-                                    </span>
-                                </div>
-                                <div class="text-center text-white font-medium">{formatAmount(order.amount)}</div>
-                            </div>
-
-                            <!-- Arrow icon -->
-                            <div class="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                <svg 
-                                    class="w-5 h-5 text-white transform group-hover:translate-x-1 transition-transform duration-300" 
-                                    fill="none" 
-                                    stroke="currentColor" 
-                                    viewBox="0 0 24 24"
+                        <!-- Orders -->
+                        <div class="space-y-3">
+                            {#each orderList as order}
+                                <button 
+                                    on:click={() => handleOrderClick(order)}
+                                    class="w-full group"
                                 >
-                                    <path 
-                                        stroke-linecap="round" 
-                                        stroke-linejoin="round" 
-                                        stroke-width="2" 
-                                        d="M17 8l4 4m0 0l-4 4m4-4H3"
-                                    />
-                                </svg>
-                            </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-6 gap-4 p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300">
+                                        <!-- Mobile: Stacked Layout -->
+                                        <div class="md:hidden space-y-3">
+                                            <div class="flex justify-between items-center">
+                                                <div class="text-white font-medium">{order.customer?.name || 'Anonymous'}</div>
+                                                <div class="text-white/70">{formatAmount(order.amount)}</div>
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <div class="text-white/70">{order.kiosk?.name || 'N/A'}</div>
+                                                <div class="backdrop-blur-md px-4 py-1.5 rounded-xl text-sm font-medium border transition-all {getStatusStyle(order.status.id)}">
+                                                    {getStatusLabel(order.status.id)}
+                                                </div>
+                                            </div>
+                                            <div class="text-white/50 text-sm">{formatDate(order.createdAt)}</div>
+                                        </div>
+
+                                        <!-- Desktop: Grid Layout -->
+                                        <div class="hidden md:block col-span-2 text-white">
+                                            <div class="font-medium">{order.customer?.name || 'Anonymous'}</div>
+                                            <div class="text-white/70 text-sm">{order.customer?.phone || 'N/A'}</div>
+                                        </div>
+                                        <div class="hidden md:flex items-center justify-center text-white/70">
+                                            {formatDate(order.createdAt)}
+                                        </div>
+                                        <div class="hidden md:flex items-center justify-center text-white/70">
+                                            {order.kiosk?.name || 'N/A'}
+                                        </div>
+                                        <div class="hidden md:flex items-center justify-center">
+                                            <span class="backdrop-blur-md px-4 py-1.5 rounded-xl text-sm font-medium border transition-all {getStatusStyle(order.status.id)}">
+                                                {getStatusLabel(order.status.id)}
+                                            </span>
+                                        </div>
+                                        <div class="hidden md:flex items-center justify-end text-white">
+                                            {formatAmount(order.amount)}
+                                        </div>
+                                    </div>
+                                </button>
+                            {/each}
                         </div>
-                    {/each}
+                    {/if}
                 </div>
-            {/if}
+            </div>
         </div>
     </div>
 </div>

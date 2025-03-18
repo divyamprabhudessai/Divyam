@@ -56,15 +56,17 @@
     <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/50 pointer-events-none"></div>
     
     <!-- Logo header -->
-    <div class="fixed top-0 w-full flex items-center justify-between p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10">
+    <div class="fixed top-0 w-full flex items-center justify-between p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10 z-50">
         <div class="flex items-center gap-4">
-            <div class="flex justify-center mb-8">
-                <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert">
-            </div>
+            <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert"> 
         </div>
-        <a href="/" class="p-2 rounded-full hover:bg-white/10 transition-colors duration-200">
+        <a 
+            href="/"
+            class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 text-white/90 hover:text-white"
+        >
+            <span>Home</span>
             <svg 
-                class="w-6 h-6 text-white" 
+                class="w-5 h-5" 
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"

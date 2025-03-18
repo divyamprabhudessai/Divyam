@@ -103,8 +103,33 @@
     <!-- Logo header -->
     <div class="fixed top-0 w-full flex items-center justify-between p-4 sm:p-5 bg-black/30 backdrop-blur-lg border-b border-white/10 z-50">
         <div class="flex items-center gap-4">
-            <img src="/src/assets/Logo.svg" alt="Logo" class="h-8 w-auto filter invert"> 
+            <img src="https://img.hotimg.com/allmighty_logo06ba4eaa2ca37a4d.jpeg" alt="Logo" class="h-8 w-auto filter invert"> 
         </div>
+        <button 
+            on:click={() => {
+                authStore.set(null);
+                if (typeof window !== 'undefined') {
+                    localStorage.removeItem('authToken');
+                }
+                goto('/');
+            }}
+            class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-white/10 transition-colors duration-200 text-white/90 hover:text-white"
+        >
+            <span>Logout</span>
+            <svg 
+                class="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+            >
+                <path 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round" 
+                    stroke-width="2" 
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+            </svg>
+        </button>
     </div>
 
     <!-- Content -->
