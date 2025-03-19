@@ -4,7 +4,7 @@ A modern order management system built with SvelteKit for the Trymighty Frontend
 
 ![Divyam Logo](https://img.hotimg.com/allmighty_logo-removebg-preview.png)
 
-🔗 **Live Demo**: [Divyam - Order Management System](https://divyam-ord-management-system-kyjso2cae.vercel.app/)
+🔗 **Live Demo**: [Divyam - Order Management System](https://divyam-order-management-system.vercel.app/)
 
 🔗 **Demo-Video**: [Video](https://streamable.com/kfq0nd)
 
